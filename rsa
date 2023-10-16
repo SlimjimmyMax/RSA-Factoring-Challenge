@@ -1,0 +1,56 @@
+#!/usr/bin/python3
+
+import sys
+import random
+
+def gcd(a, b):
+    while b:
+        a, b = b, a % b
+    return a
+
+def pollard_rho(n):
+    def f(x):
+        return (x ** 2 + 1) % n
+
+    x = random.randint(1, n - 1)
+    y = x
+    d = 1
+
+    while d == 1:
+        x = f(x)
+        y = f(f(y))
+        d = gcd(abs(x - y), n)
+
+    return d
+
+def factorize_rsa_number(n):
+    factors = []
+    while n > 1:
+        factor = pollard_rho(n)
+        while n % factor == 0:
+            n //= factor
+        factors.append(factor)
+
+    return factors
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: rsa <number>")
+        sys.exit(1)
+
+    n = int(sys.argv[1])
+    factors = factorize_rsa_number(n)
+
+    prime_factors = []
+    for factor in factors:
+        while n % factor == 0:
+            prime_factors.append(factor)
+            n //= factor
+
+    prime_factors.sort()
+    if len(prime_factors) == 2:
+        p, q = prime_factors
+        print(f"{n}={p}*{q}")
+    else:
+        print(f"Failed to factorize {n} into two prime numbers.")
+
